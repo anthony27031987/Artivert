@@ -1,20 +1,17 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { Pool } from 'pg';
+import pool from './utils/database';
+import { logger } from './utils/logger';
+import apiRoutes from './routes';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-// Middleware
+// Middleware de sécurité
 app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -23,33 +20,54 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'API Artivert running ✅' });
+// Logging middleware
+app.use((req: Request, res: Response, next) => {
+  logger.info(`${req.method} ${req.path}`, { ip: req.ip });
+  next();
 });
 
-// API Routes (à implémenter)
-app.get('/api/v1/status', (req, res) => {
-  res.json({ 
-    message: 'Artivert API v1',
+// Routes
+app.use('/api/v1', apiRoutes);
+
+// Health check
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'API Artivert running ✅',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    uptime: process.uptime(),
   });
+});
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ error: 'Route non trouvée' });
 });
 
 // Error handling middleware
-app.use((err: any, req: any, res: any, next: any) => {
-  console.error(err);
+app.use((err: any, req: Request, res: Response) => {
+  logger.error('Unhandled error', { error: err.message });
   res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error'
+    error: err.message || 'Erreur serveur interne',
   });
+});
+
+// Test database connection
+pool.connect(async (err, client, release) => {
+  if (err) {
+    logger.error('Database connection error', { error: err });
+    process.exit(1);
+  } else {
+    logger.info('✅ Database connected successfully');
+    release();
+  }
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Artivert Backend running on port ${PORT}`);
-  console.log(`📦 Database: ${process.env.DATABASE_URL}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL}`);
+  logger.info(`🚀 Artivert Backend running on port ${PORT}`);
+  logger.info(`📦 Database: ${process.env.DATABASE_URL}`);
+  logger.info(`🌐 Frontend URL: ${process.env.FRONTEND_URL}`);
+  logger.info(`📖 API Documentation: http://localhost:${PORT}/docs (coming soon)`);
 });
 
 export default app;
