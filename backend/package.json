@@ -1,0 +1,46 @@
+{
+  "name": "artivert-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Artivert - Application de gestion paysagisme",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["paysagisme", "gestion", "pointage", "geolocalisation"],
+  "author": "Artivert",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "jsonwebtoken": "^9.1.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-validator": "^7.0.0",
+    "socket.io": "^4.7.2",
+    "nodemailer": "^6.9.7",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1",
+    "date-fns": "^2.30.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/nodemailer": "^6.4.14",
+    "@types/multer": "^1.4.11",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0"
+  }
+}
